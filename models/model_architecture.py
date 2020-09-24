@@ -75,9 +75,28 @@ class DocumentBERTLSTM(BertPreTrainedModel):
             loss_funct = CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
             loss_logits =  loss_funct(prediction.view(-1, self.num_labels), labels.view(-1))
             loss= loss_logits
-            output = [loss, output]
+            prediction = [loss, prediction]
 
-        return output
+        return prediction
+    
+    
+    def freeze_bert_encoder(self):
+        for param in self.bert.parameters():
+            param.requires_grad = False
+
+    def unfreeze_bert_encoder(self):
+        for param in self.bert.parameters():
+            param.requires_grad = True
+
+    def unfreeze_bert_encoder_last_layers(self):
+        for name, param in self.bert.named_parameters():
+            if "encoder.layer.11" in name or "pooler" in name:
+                param.requires_grad = True
+    def unfreeze_bert_encoder_pooler_layer(self):
+        for name, param in self.bert.named_parameters():
+            if "pooler" in name:
+                param.requires_grad = True
+
     
 class DocumentRobertaLSTM(RobertaPreTrainedModel):
     """
@@ -131,9 +150,26 @@ class DocumentRobertaLSTM(RobertaPreTrainedModel):
             loss_funct = CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
             loss_logits =  loss_funct(prediction.view(-1, self.num_labels), labels.view(-1))
             loss= loss_logits
-            outputs = (loss,) + outputs
+            prediction = (loss,) + prediction
 
-        return outputs
+        return prediction
     
+    def freeze_bert_encoder(self):
+        for param in self.bert.parameters():
+            param.requires_grad = False
+
+    def unfreeze_bert_encoder(self):
+        for param in self.bert.parameters():
+            param.requires_grad = True
+
+    def unfreeze_bert_encoder_last_layers(self):
+        for name, param in self.bert.named_parameters():
+            if "encoder.layer.11" in name or "pooler" in name:
+                param.requires_grad = True
+    def unfreeze_bert_encoder_pooler_layer(self):
+        for name, param in self.bert.named_parameters():
+            if "pooler" in name:
+                param.requires_grad = True
+
     
     
