@@ -17,7 +17,9 @@ def encode_documents(documents,params,tokenizer):
     print("max sentences in documents",max_sequences_per_document)
     max_sequences_per_document=params['max_sentences_per_doc']
     if(params['model_path']=='xlm-roberta-base'):
-        output = torch.ones(size=(len(documents), max_sequences_per_document, 3, max_input_length),dtype=torch.long)
+        output= torch.zeros(size=(len(documents), max_sequences_per_document, 2, max_input_length),dtype=torch.long)
+        output_2=torch.ones(size=(len(documents), max_sequences_per_document, 1, max_input_length),dtype=torch.long)
+        output=torch.cat((output_2,output),dim=2)
         start_token='<s>'
         end_token='</s>'
     elif(params['model_path']=='bert-base-multilingual-cased'):
@@ -70,7 +72,11 @@ def encode_documents(documents,params,tokenizer):
 def return_dataloader(document_tensors,labels,params,is_train=False):
     labels = torch.tensor(labels,dtype=torch.long)
     
-    data = TensorDataset(document_tensors,labels)
+    token_ids= document_tensors[:,:,0,:].squeeze()    
+    attentions_mask= document_tensors[:,:,1,:].squeeze()
+    tokens_types= document_tensors[:,:,2,:].squeeze()
+    
+    data=TensorDataset(token_ids,attentions_mask,tokens_types,labels)       
     if(is_train==False):
         sampler = SequentialSampler(data)
     else:
