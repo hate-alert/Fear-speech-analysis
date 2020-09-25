@@ -9,8 +9,9 @@ from tqdm import tqdm, tqdm_notebook
 parent_path='../Data/New_Data_15-06-2020/'
 
 
-
-params={'model_path':'bert-base-multilingual-cased',
+#bert-base-multilingual-cased
+#xlm-roberta-base
+params={'model_path':'xlm-roberta-base',
         'max_length':256,
         'batch_size':32,
         'weights':[1.0,1.0],
@@ -21,7 +22,7 @@ params={'model_path':'bert-base-multilingual-cased',
         'learning_rate':7e-5,
         'epsilon':1e-8,
         'random_seed':2,
-        'epochs':20,
+        'epochs':50,
         'max_memory':0.7
        }
 

@@ -25,13 +25,14 @@ def eval_phase(params,test_dataloader,which_files='test',model=None,device=None)
     # Evaluate data for one epoch
     for batch in tqdm(test_dataloader,total=len(test_dataloader)):
         # Add batch to GPU
-        batch = tuple(t.to(device) for t in batch)
-        # Unpack the inputs from our dataloader
-        b_input_ids, b_labels = batch
+        b_input_ids = batch[0].to(device)
+        b_att_masks = batch[1].to(device)
+        b_token_types = batch[2].to(device)
+        b_labels = batch[3].to(device)
         # Telling the model not to compute or store gradients, saving memory and
         # speeding up validation
         with torch.no_grad():        
-            outputs = model(b_input_ids)
+            outputs = model(input_ids=b_input_ids, attention_mask=b_att_masks, token_type_ids=b_token_types)
 
         logits = outputs
         # Move logits and labels to CPU
@@ -78,8 +79,13 @@ def train_phase(params):
     list_total_truth=[]
     
     
-    skf = StratifiedKFold(n_splits=10, random_state= 2020)
+    skf = StratifiedKFold(n_splits=5, random_state= 2020)
+    count_skf=0
     for train_index, test_index in skf.split(X_0, y_0):
+        count_skf+=1
+        print("")
+        print('======== Fold {:} / {:} ========'.format(count_skf,5))
+        
         
         model=select_transformer_model(params['transformer_type'],params['model_path'],params)
         model.freeze_bert_encoder()
@@ -139,12 +145,14 @@ def train_phase(params):
                     # Calculate elapsed time in minutes.
                     elapsed = format_time(time.time() - t0)
                 # `batch` contains three pytorch tensors:
-                #   [0]: document tuples 
+                #   [0]: tokens
                 #   [1]: labels 
                 b_input_ids = batch[0].to(device)
-                b_labels = batch[1].to(device)
+                b_att_masks = batch[1].to(device)
+                b_token_types = batch[2].to(device)
+                b_labels = batch[3].to(device)
                 model.zero_grad()        
-                outputs = model(b_input_ids,labels=b_labels,device=device)
+                outputs = model(input_ids=b_input_ids, attention_mask=b_att_masks, token_type_ids=b_token_types,labels=b_labels,device=device)
                 loss = outputs[0]
                 total_loss += loss.item()
                 loss.backward()
