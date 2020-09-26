@@ -10,6 +10,43 @@ from transformers import AdamW, BertConfig
 from transformers import *
 import time
 from tqdm import tqdm,tqdm_notebook
+from sklearn.metrics import confusion_matrix,make_scorer, f1_score, accuracy_score, recall_score, precision_score, classification_report, precision_recall_fscore_support
+
+def softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0) # only difference
+
+
+def pandas_classification_report(y_true, y_pred):
+    metrics_summary = precision_recall_fscore_support(
+            y_true=y_true, 
+            y_pred=y_pred)
+    cm = confusion_matrix(y_true, y_pred)
+    cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    
+    
+    avg = list(precision_recall_fscore_support(
+            y_true=y_true, 
+            y_pred=y_pred,
+            average='macro'))
+    avg.append(accuracy_score(y_true, y_pred, normalize=True))
+    metrics_sum_index = ['precision', 'recall', 'f1-score', 'support','accuracy']
+    list_all=list(metrics_summary)
+    list_all.append(cm.diagonal())
+    class_report_df = pd.DataFrame(
+        list_all,
+        index=metrics_sum_index)
+
+    support = class_report_df.loc['support']
+    total = support.sum() 
+    avg[-2] = total
+
+    class_report_df['avg / total'] = avg
+
+    return class_report_df.T
+
+
 
 def eval_phase(params,test_dataloader,which_files='test',model=None,device=None):
     model.eval()
@@ -22,6 +59,7 @@ def eval_phase(params,test_dataloader,which_files='test',model=None,device=None)
     nb_eval_steps=0
     true_labels=[]
     pred_labels=[]
+    logits_all=[]
     # Evaluate data for one epoch
     for batch in tqdm(test_dataloader,total=len(test_dataloader)):
         # Add batch to GPU
@@ -41,20 +79,29 @@ def eval_phase(params,test_dataloader,which_files='test',model=None,device=None)
         # Accumulate the total accuracy.
         pred_labels+=list(np.argmax(logits, axis=1).flatten())
         true_labels+=list(label_ids.flatten())
-
+        logits_all+=list(logits)
         # Track the number of batches
         nb_eval_steps += 1
-        
+    
+    logits_all_final=[]
+    for logits in logits_all:
+        logits_all_final.append(softmax(logits)[1])
+    
     print(pred_labels[0:5],true_labels[0:5])
     testf1=f1_score(true_labels, pred_labels, average='macro')
     testacc=accuracy_score(true_labels,pred_labels)
-    return testf1,testacc,true_labels,pred_labels
+    testrocauc=roc_auc_score(true_labels, logits_all_final,average='macro')
+    
+    return testf1,testacc,true_labels,pred_labels,testrocauc
 
 
 def train_phase(params):
     annotated_df=pd.read_pickle(params['data_path'])
     params_preprocess={'remove_numbers': True, 'remove_emoji': True, 'remove_stop_words': False, 'tokenize': False}
-    list_sents=[preprocess_sent(ele,params=params_preprocess) for ele in tqdm(annotated_df['message_text'],total=len(annotated_df))]
+    if(params['preprocess_doc']==True):
+        list_sents=[preprocess_doc(ele,params=params_preprocess) for ele in tqdm(annotated_df['message_text'],total=len(annotated_df))]
+    else:
+        list_sents=[preprocess_sent(ele,params=params_preprocess) for ele in tqdm(annotated_df['message_text'],total=len(annotated_df))]
     X_0 = np.array(list_sents,dtype='object')
     y_0 = np.array(annotated_df['one_fear_speech'])
     params['weights']=list(class_weight.compute_class_weight("balanced", np.unique(y_0),y_0).astype(float))
@@ -73,6 +120,7 @@ def train_phase(params):
     
     list_val_accuracy=[]
     list_val_fscore=[]
+    list_val_rocauc =[]
     list_epoch=[]
     
     list_total_preds=[]
@@ -88,8 +136,9 @@ def train_phase(params):
         
         
         model=select_transformer_model(params['transformer_type'],params['model_path'],params)
-        model.freeze_bert_encoder()
-        model.unfreeze_bert_encoder_last_layers()
+        if(params['transformer_type']!='birnn_laser'):
+            model.freeze_bert_encoder()
+            model.unfreeze_bert_encoder_last_layers()
 
         if(params["device"]=='cuda'):
             model.cuda()
@@ -105,9 +154,13 @@ def train_phase(params):
         y_train, y_test = y_0[train_index], y_0[test_index]
         
         print(X_train.shape)
-        X_train, X_train_length = encode_documents(X_train,params,tokenizer)
-        X_test, X_test_length = encode_documents(X_test,params,tokenizer)
-        print(X_train.shape,X_test.shape)
+        if(params['transformer_type']=='birnn_laser'):
+            X_train = encode_documents_laser(X_train,params)
+            X_test= encode_documents_laser(X_test,params)
+        
+        else:
+            X_train = encode_documents(X_train,params,tokenizer)
+            X_test= encode_documents(X_test,params,tokenizer)
         train_dataloader=return_dataloader(X_train,y_train,params,is_train=True)
         test_dataloader=return_dataloader(X_test,y_test,params,is_train=False)
         
@@ -121,6 +174,7 @@ def train_phase(params):
         bert_model = params['model_path']
         best_val_fscore=0
         best_val_accuracy=0
+        best_val_rocauc=0
         epoch_count=0
         best_true_labels=[]
         best_pred_labels=[]
@@ -160,31 +214,38 @@ def train_phase(params):
                 optimizer.step()
                 scheduler.step()
             avg_train_loss = total_loss / len(train_dataloader)
-            train_fscore,train_accuracy,_,_=eval_phase(params,train_dataloader,'train',model,device=device)
+            train_fscore,train_accuracy,_,_,_=eval_phase(params,train_dataloader,'train',model,device=device)
             print('avg_train_loss',avg_train_loss)
             print('train_fscore',train_fscore)
             print('train_accuracy',train_accuracy)
             # Store the loss value for plotting the learning curve.
             loss_values.append(avg_train_loss)
-            val_fscore,val_accuracy,true_labels,pred_labels=eval_phase(params,test_dataloader,'val',model,device=device)
+            val_fscore,val_accuracy,true_labels,pred_labels,val_rocauc=eval_phase(params,test_dataloader,'val',model,device=device)
             print('val_fscore',val_fscore)
             print('val_accuracy',val_accuracy)
+            print('val_rocauc',val_rocauc)
+            
             #Report the final accuracy for this validation run.
-            if(val_fscore > best_val_fscore):
-                print(val_fscore,best_val_fscore)
+            if(val_rocauc > best_val_rocauc):
+                print(val_rocauc,best_val_rocauc)
                 best_val_fscore=val_fscore
                 best_val_accuracy=val_accuracy
+                best_val_rocauc=val_rocauc
                 epoch_count=epoch_i
                 best_pred_labels=pred_labels
                 best_true_labels=true_labels
+                
         list_total_preds+=best_pred_labels
         list_total_truth+=best_true_labels
         list_val_fscore.append(best_val_fscore)
         list_val_accuracy.append(best_val_accuracy)
+        list_val_rocauc.append(best_val_rocauc)
+        
         list_epoch.append(epoch_count)
        
     print("Accuracy: %0.2f (+/- %0.2f)" % (np.array(list_val_accuracy).mean(), np.array(list_val_accuracy).std() * 2))
     print("Fscore: %0.2f (+/- %0.2f)" % (np.array(list_val_fscore).mean(), np.array(list_val_fscore).std() * 2))
+    print("AUC-ROC: %0.2f (+/- %0.2f)" % (np.array(list_val_rocauc).mean(), np.array(list_val_rocauc).std() * 2))
     print("Epoch: %0.2f (+/- %0.2f)" % (np.array(list_epoch).mean(), np.array(list_epoch).std() * 2))
     print(pandas_classification_report(list_total_truth, list_total_preds))
 
