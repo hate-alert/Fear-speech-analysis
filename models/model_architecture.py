@@ -108,7 +108,7 @@ class DocumentRobertaLSTM(RobertaPreTrainedModel):
         self.lstm = LSTM(config.hidden_size,params['hidden_size'])
         self.classifier = nn.Sequential(
             nn.Dropout(p=config.hidden_dropout_prob),
-            nn.Linear(config.hidden_size, config.num_labels),
+            nn.Linear(params['hidden_size'], config.num_labels),
             nn.Tanh()
         )
         self.init_weights()

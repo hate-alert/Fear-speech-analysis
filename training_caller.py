@@ -12,7 +12,7 @@ parent_path='../Data/New_Data_15-06-2020/'
 #bert-base-multilingual-cased
 #xlm-roberta-base
 #birnn_laser
-params={'model_path':'bert-base-multilingual-cased',
+params={'model_path':'xlm-roberta-base',
         'preprocess_doc':False,
         'max_length':256,
         'batch_size':32,
