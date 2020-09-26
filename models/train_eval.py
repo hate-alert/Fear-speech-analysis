@@ -151,11 +151,7 @@ def train_phase(params):
 #                     )
         ### variable learning rate 
     
-        optimizer = AdamW([
-                            {"params": model.roberta.parameters()},
-                            {"params": model.lstm.parameters(), "lr": 1e-3},
-                            {"params": model.classifier.parameters(), "lr": 1e-3}
-                        ],lr = params['learning_rate'], # args.learning_rate - default is 5e-5, our notebook had 2e-5
+        optimizer = AdamW(model.parameters(),lr = params['learning_rate'], # args.learning_rate - default is 5e-5, our notebook had 2e-5
                       eps = params['epsilon'] # args.adam_epsilon  - default is 1e-8.
                     )
         
@@ -170,12 +166,13 @@ def train_phase(params):
         else:
             X_train = encode_documents(X_train,params,tokenizer)
             X_test= encode_documents(X_test,params,tokenizer)
+            
         train_dataloader=return_dataloader(X_train,y_train,params,is_train=True)
         test_dataloader=return_dataloader(X_test,y_test,params,is_train=False)
         
         total_steps = len(train_dataloader) * params['epochs']
 
-        scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps = int(total_steps/10),                     num_training_steps = total_steps)
+        scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps = 100,num_training_steps = total_steps)
         fix_the_random(seed_val = params['random_seed'])
         # Store the average loss after each epoch so we can plot them.
         loss_values = []
@@ -243,7 +240,7 @@ def train_phase(params):
                 epoch_count=epoch_i
                 best_pred_labels=pred_labels
                 best_true_labels=true_labels
-                
+                save_bert_model(model,tokenizer,params,count_skf)
         list_total_preds+=best_pred_labels
         list_total_truth+=best_true_labels
         list_val_fscore.append(best_val_fscore)

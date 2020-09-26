@@ -36,8 +36,8 @@ def format_time(elapsed):
 
 
 
-def save_bert_model(model,tokenizer,params):
-    output_dir = 'Saved/'+params['path_files']
+def save_bert_model(model,tokenizer,params,fold):
+    output_dir = 'Saved/'+params['path_files']+'_'+str(fold)
     # Create output directory if needed
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)

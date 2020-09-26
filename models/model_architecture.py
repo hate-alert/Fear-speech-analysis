@@ -43,7 +43,7 @@ class DocumentBERTLSTM(BertPreTrainedModel):
         self.lstm = LSTM(config.hidden_size,params['hidden_size'])
         self.classifier = nn.Sequential(
             nn.Dropout(p=config.hidden_dropout_prob),
-            nn.Linear(config.hidden_size, config.num_labels),
+            nn.Linear(params['hidden_size'], config.num_labels),
             nn.Tanh()
         )
 
@@ -51,20 +51,7 @@ class DocumentBERTLSTM(BertPreTrainedModel):
     def forward(self, input_ids=None, attention_mask=None,token_type_ids=None, labels= None,device=None):
 
         #contains all BERT sequences
-        #bert should output a (batch_size, num_sequences, bert_hidden_size)
-#         bert_output = torch.zeros(size=(document_batch.shape[0],
-#                                               min(document_batch.shape[1],self.bert_batch_size),
-#                                               self.bert.config.hidden_size), dtype=torch.float, device=device)
 
-#         #only pass through bert_batch_size numbers of inputs into bert.
-#         #this means that we are possibly cutting off the last part of documents.
-
-#         for doc_id in range(document_batch.shape[0]):
-#             bert_output[doc_id][:self.bert_batch_size] = self.dropout(self.bert(document_batch[doc_id][:self.bert_batch_size,0],
-#                                             token_type_ids=document_batch[doc_id][:self.bert_batch_size,1],
-#                                             attention_mask=document_batch[doc_id][:self.bert_batch_size,2])[1])
-        
-        
         bert_output=self.dropout(self.bert(input_ids.view(-1,input_ids.shape[2]),attention_mask.view(-1,input_ids.shape[2]),
                                            token_type_ids.view(-1,input_ids.shape[2]))[1])
         
@@ -118,7 +105,7 @@ class DocumentRobertaLSTM(RobertaPreTrainedModel):
         self.weights=params['weights']
         self.bert_batch_size=params['max_sentences_per_doc']
         self.dropout = nn.Dropout(p=config.hidden_dropout_prob)
-        self.lstm = LSTM(config.hidden_size,config.hidden_size)
+        self.lstm = LSTM(config.hidden_size,params['hidden_size'])
         self.classifier = nn.Sequential(
             nn.Dropout(p=config.hidden_dropout_prob),
             nn.Linear(config.hidden_size, config.num_labels),
