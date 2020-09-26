@@ -96,8 +96,17 @@ def train_phase(params):
         
         
         #### loading optimizer
-        optimizer = AdamW(model.parameters(),
-                      lr = params['learning_rate'], # args.learning_rate - default is 5e-5, our notebook had 2e-5
+#         optimizer = AdamW(model.parameters(),
+#                       lr = params['learning_rate'], # args.learning_rate - default is 5e-5, our notebook had 2e-5
+#                       eps = params['epsilon'] # args.adam_epsilon  - default is 1e-8.
+#                     )
+        ### variable learning rate 
+    
+        optimizer = AdamW([
+                            {"params": model.roberta.parameters()},
+                            {"params": model.lstm.parameters(), "lr": 1e-3},
+                            {"params": model.classifier.parameters(), "lr": 1e-3}
+                        ],lr = params['learning_rate'], # args.learning_rate - default is 5e-5, our notebook had 2e-5
                       eps = params['epsilon'] # args.adam_epsilon  - default is 1e-8.
                     )
         
@@ -115,7 +124,7 @@ def train_phase(params):
 
         scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps = int(total_steps/10),                     num_training_steps = total_steps)
         fix_the_random(seed_val = params['random_seed'])
-        # Store the averaggit pull origin master --allow-unrelated-historiese loss after each epoch so we can plot them.
+        # Store the average loss after each epoch so we can plot them.
         loss_values = []
 
         bert_model = params['model_path']
