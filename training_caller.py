@@ -12,14 +12,21 @@ parent_path='../Data/New_Data_15-06-2020/'
 #bert-base-multilingual-cased
 #xlm-roberta-base
 params={'model_path':'xlm-roberta-base',
+        'preprocess_doc':True,
         'max_length':256,
         'batch_size':32,
+        'hidden_size':128,
         'weights':[1.0,1.0],
+        'seq_model':'lstm',
         'data_path':parent_path+'Fearspeech_data_final.pkl',
-        'max_sentences_per_doc':5,
-        'transformer_type':'lstm_transformer',
+        'max_sentences_per_doc':50,
+        'transformer_type':'birnn_laser',
         'device':'cuda',
+<<<<<<< HEAD
         'learning_rate':7e-5,
+=======
+        'learning_rate':0.001,
+>>>>>>> 868b332b59ee91b3c57e0c1c36046c1fe28d1bf8
         'epsilon':1e-8,
         'random_seed':2,
         'epochs':50,

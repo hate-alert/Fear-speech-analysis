@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -12,6 +13,8 @@
 
 # In[5]:
 
+=======
+>>>>>>> 868b332b59ee91b3c57e0c1c36046c1fe28d1bf8
 
 #export
 import re

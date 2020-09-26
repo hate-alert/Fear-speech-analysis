@@ -4,8 +4,14 @@ import math
 from tqdm import tqdm 
 import sys
 sys.path.append("..") 
-from utils.preprocess import preprocess_sent
+from utils.preprocess import preprocess_sent,preprocess_doc
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+from langdetect import DetectorFactory
+DetectorFactory.seed = 0
+from langdetect import detect
+from laserembeddings import Laser
+
+
 
 def encode_documents(documents,params,tokenizer):
     
@@ -58,15 +64,37 @@ def encode_documents(documents,params,tokenizer):
             assert len(input_ids) == max_input_length and len(attention_masks) == max_input_length and len(input_type_ids) == max_input_length
 
             #we are ready to rumble
-            output[doc_index][seq_index] = torch.cat((  torch.LongTensor(input_ids).unsqueeze(0),
-                                                        torch.LongTensor(input_type_ids).unsqueeze(0),
-                                                        torch.LongTensor(attention_masks).unsqueeze(0)),
+            output[doc_index][seq_index] = torch.cat((torch.LongTensor(input_ids).unsqueeze(0),
+                                                    torch.LongTensor(input_type_ids).unsqueeze(0),
+                                                    torch.LongTensor(attention_masks).unsqueeze(0)),
                                                           dim=0)
             
             max_seq_index = seq_index
         document_seq_lengths.append(max_seq_index+1)
-    return output, torch.LongTensor(document_seq_lengths)
+    return output
 
+
+
+def encode_documents_laser(documents,params,tokenizer=None):
+    max_input_length=params['max_length']
+    laser = Laser()
+    output = torch.zeros(size=(len(documents), params['max_sentences_per_doc'], 3, 1024),dtype=torch.float)
+    for doc_index, tokenized_document in tqdm(enumerate(documents)):
+        lang_list=[]
+        
+        for ele in tokenized_document:
+            try:
+                lang_list.append(detect(ele))
+            except:
+                lang_list.append('en')
+        
+        embeddings = laser.embed_sentences(tokenized_document,lang=lang_list)  # lang is only used for tokenization
+        for seq_index,embed in enumerate(embeddings):
+            if(seq_index >= params['max_sentences_per_doc']):
+                continue
+            output[doc_index][seq_index][0]=torch.FloatTensor(embed)
+
+    return output
 
 
 def return_dataloader(document_tensors,labels,params,is_train=False):
