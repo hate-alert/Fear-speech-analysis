@@ -136,7 +136,7 @@ def train_phase(params):
         
         
         model=select_transformer_model(params['transformer_type'],params['model_path'],params)
-        if(params['transformer_type']!='birnn_laser'):
+        if(params['freeze_bert']==True):
             model.freeze_bert_encoder()
             model.unfreeze_bert_encoder_last_layers()
 
@@ -162,14 +162,21 @@ def train_phase(params):
         if(params['transformer_type']=='birnn_laser'):
             X_train = encode_documents_laser(X_train,params)
             X_test= encode_documents_laser(X_test,params)
-        
+        elif(params['transformer_type']=='normal_transformer'):
+            #X_train,X_train_mask,y_train = encode_documents_sent(X_train,y_train,params,tokenizer)
+            #X_test,X_test_mask,y_test= encode_documents_sent(X_test,y_test,params,tokenizer)
+            X_train,X_train_mask= encode_sent(X_train,params,tokenizer)
+            X_test,X_test_mask= encode_sent(X_test,params,tokenizer)
         else:
             X_train = encode_documents(X_train,params,tokenizer)
             X_test= encode_documents(X_test,params,tokenizer)
-            
-        train_dataloader=return_dataloader(X_train,y_train,params,is_train=True)
-        test_dataloader=return_dataloader(X_test,y_test,params,is_train=False)
-        
+        if(params['transformer_type']=='normal_transformer'):
+            train_dataloader=return_dataloader_sent(X_train,X_train_mask,y_train,params,is_train=True)
+            test_dataloader=return_dataloader_sent(X_test,X_test_mask,y_test,params,is_train=False)
+        else:
+            train_dataloader=return_dataloader(X_train,y_train,params,is_train=True)
+            test_dataloader=return_dataloader(X_test,y_test,params,is_train=False)
+
         total_steps = len(train_dataloader) * params['epochs']
 
         scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps = 100,num_training_steps = total_steps)
@@ -240,13 +247,12 @@ def train_phase(params):
                 epoch_count=epoch_i
                 best_pred_labels=pred_labels
                 best_true_labels=true_labels
-                save_bert_model(model,tokenizer,params,count_skf)
+                #save_bert_model(model,tokenizer,params,count_skf)
         list_total_preds+=best_pred_labels
         list_total_truth+=best_true_labels
         list_val_fscore.append(best_val_fscore)
         list_val_accuracy.append(best_val_accuracy)
         list_val_rocauc.append(best_val_rocauc)
-        
         list_epoch.append(epoch_count)
        
     print("Accuracy: %0.2f (+/- %0.2f)" % (np.array(list_val_accuracy).mean(), np.array(list_val_accuracy).std() * 2))

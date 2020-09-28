@@ -1,6 +1,6 @@
 led / optimized / DLL files
 Saved/
-.ipynb_checkpoints/
+.ipynb_checkpoints
 __pycache__/
 *.py[cod]
 *$py.class
