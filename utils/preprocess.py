@@ -87,21 +87,23 @@ def preprocess_doc(sent,params={'remove_numbers':False,'remove_emoji':True,'remo
     '''input: a document / sentence , params is a dict of control sequence'''
     '''output: should return a token list for the entire document/sentence'''
 
-    s = sent
-    s = emoji.demojize(s)
-    s = re.sub(r"http\S+",'', s)
-    s = re.sub(r"www.\S+",'', s)
+    
+    sent = emoji.demojize(sent)
+    sent = re.sub(r"http\S+",'', sent)
+    sent = re.sub(r"www.\S+",'', sent)
     
     if(params['remove_numbers']==True):
-        s = re.sub(r"[-+]?[.\d]*[\d]+[:,.\d]*", "",s)
-    s = re.sub(r"/-", " ",s)
-    s = re.sub(r"#,\,", " ",s)
+        sent = re.sub(r"[-+]?[.\d]*[\d]+[:,.\d]*", "",sent)
+    sent = re.sub(r"/-", " ",sent)
+    sent = re.sub(r"#,\,", " ",sent)
     tokenizer = TokenizeSentence('hindi')
     sents = tokenizer.tokenize(sent)
     all_sents=[]
+    
+    
     for s in sents:
         if(params['remove_emoji']==True):
-            s = re.sub(r":\S+:", " ",s)
+            s = re.sub(r":\S+:", "",s)
         else:
             s = re.sub(r"[:\*]", "",s)
 

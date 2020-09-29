@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-# default_exp utils
-
-
-# # Utils
-# > miscellanous functions that are used in many modules
-
-# In[5]:
-
-=======
->>>>>>> 868b332b59ee91b3c57e0c1c36046c1fe28d1bf8
-
 #export
 import re
 import emoji
@@ -230,31 +212,6 @@ def return_url_dict(df):
 
 # In[ ]:
 
-
-stanza.download('en', verbose=False)
-
-
-# In[ ]:
-
-
-text="'चैटिगँ छोडकर इस पोस्ट को जरूर पढेँ वर्ना सारी जिन्दगी चैट ही करते रह जाओग','मेँ भारत से एक हिस्सा अलग हुआ, इस्लामिक राष्ट्र बना -* नाम है अफगानिस्तान. *1947 मेँ भारत से एक हिस्सा अलग हुआ'"
-
-
-# In[ ]:
-
-
-hi_doc = hi_nlp(text)
-
-
-# In[ ]:
-
-
-emoji_to_be_taken="😑"
-
-
-# In[ ]:
-
-
 #export
 def get_lexicon(type):
     lexicon_path='../Data/Important_lexicon/'
@@ -266,78 +223,14 @@ def get_lexicon(type):
     return lexicon
 
 
-# In[ ]:
-
-
-#export
-import stanza
-
-
-# In[11]:
-
-
-#export
-
-def findPOS(textlist,lang='hi',pos={'noun':['NNP','NNPC','NN','NNPS','NNP','NNS'],'verb':['VB','VM','VBD','VBG','VBN','VBP','VBZ'],'adj':['JJ','JJR','JJS']},k=10):
-    text='. '.join(textlist)
-    nlp = stanza.Pipeline(lang, processors='tokenize,mwt,pos', verbose=False, use_gpu=True)
-    doc = nlp(text)
-    rank_dict={}
-    for p in pos.keys():
-        rank_dict[p]={}
-    for sent in tqdm_notebook(doc.sentences):
-        for word in sent.words:
-            for p in pos.keys():
-#                 print(word.xpos)
-                if(word.xpos in pos[p]):
-                    try:
-                        rank_dict[p][word.text]+=1
-                    except:
-                        rank_dict[p][word.text]=1
-    return_dict={}
-#     print(rank_dict)
-    for p in pos.keys():
-        rank_dict[p]=sorted(rank_dict[p].items(), key=lambda item: item[1],reverse=True)
-        try:
-            return_dict[p]=(rank_dict[p])[:k]
-        except:
-            return_dict[p]=(rank_dict[p])
-    return return_dict
-        
-
-
-# In[ ]:
-
-
-x=['चैटिगँ छोडकर इस पोस्ट को जरूर पढेँ वर्ना सारी जिन्दगी चैट ही करते रह जाओग','मेँ भारत से एक हिस्सा अलग हुआ, इस्लामिक राष्ट्र बना -* नाम है अफगानिस्तान. *1947 मेँ भारत से एक हिस्सा अलग हुआ']
-for i in range(0,100):
-    x.append(x[0])
-
-
-# In[ ]:
 
 
 import time
-
-
-# In[ ]:
-
-
 t=time.time()
 dict=findPOS(x)
 print(time.time()-t)
 
 
-# In[ ]:
-
-
-dict
-
-
-# In[8]:
-
-
-#export
 def is_emoji(sentence,emojis):
     count=0
     for emoji in emojis:

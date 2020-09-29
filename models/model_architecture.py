@@ -22,6 +22,19 @@ def select_transformer_model(type_of_model,path,params):
             )
     if(type_of_model=='birnn_laser'):
         model=BiRNN(params)
+    if(type_of_model=='normal_transformer'):
+        if (path=='bert-base-multilingual-cased'):
+            model = weighted_BERT.from_pretrained(
+            path, # Use the 12-layer BERT model, with an uncased vocab.
+            num_labels = 2,  
+            params=params
+            )
+        elif (path=='xlm-roberta-base'):
+            model = weighted_Roberta.from_pretrained(
+            path, # Use the 12-layer BERT model, with an uncased vocab.
+            num_labels = 2, # The number of output labels--2 for binary classification             # You can increase this for multi-class tasks.   
+            params=params
+            )
 
     return model
 
@@ -156,6 +169,143 @@ class DocumentRobertaLSTM(RobertaPreTrainedModel):
             if "pooler" in name:
                 param.requires_grad = True
 
+                
+                
+class weighted_BERT(BertPreTrainedModel):
+    def __init__(self, config,params):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.weights=params['weights']
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        #self.softmax=nn.Softmax(config.num_labels)
+        self.init_weights()
+
+    def forward(self,
+        input_ids=None,
+        attention_mask=None,
+        attention_vals=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        device=None):
+
+        outputs = self.bert(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+        )
+
+        pooled_output = outputs[1]
+
+        pooled_output = self.dropout(pooled_output)
+        logits = self.classifier(pooled_output)
+        
+        outputs = (logits,) + outputs[2:]  # add hidden states and attention if they are here
+        
+        if labels is not None:
+            loss_funct = CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
+            loss_logits =  loss_funct(logits.view(-1, self.num_labels), labels.view(-1))
+            loss= loss_logits
+            outputs = (loss,) + outputs
+            
+        return outputs  # (loss), logits, (hidden_states), (attentions)
+    
+    
+    
+    
+    def freeze_bert_encoder(self):
+        for param in self.bert.parameters():
+            param.requires_grad = False
+
+    def unfreeze_bert_encoder(self):
+        for param in self.bert.parameters():
+            param.requires_grad = True
+
+    def unfreeze_bert_encoder_last_layers(self):
+        for name, param in self.bert.named_parameters():
+            if "encoder.layer.11" in name or "pooler" in name:
+                param.requires_grad = True
+    def unfreeze_bert_encoder_pooler_layer(self):
+        for name, param in self.bert.named_parameters():
+            if "pooler" in name:
+                param.requires_grad = True
+
+
+class weighted_Roberta(RobertaPreTrainedModel):
+    def __init__(self, config,params):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.weights=params['weights']
+        self.roberta= RobertaModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        #self.softmax=nn.Softmax(config.num_labels)
+        self.init_weights()
+
+    def forward(self,
+        input_ids=None,
+        attention_mask=None,
+        attention_vals=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        device=None):
+
+        outputs = self.roberta(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+        )
+
+        pooled_output = outputs[1]
+
+        pooled_output = self.dropout(pooled_output)
+        logits = self.classifier(pooled_output)
+        
+        outputs =logits  # add hidden states and attention if they are here
+        
+        if labels is not None:
+            loss_funct = CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
+            loss_logits =  loss_funct(logits.view(-1, self.num_labels), labels.view(-1))
+            loss= loss_logits
+            outputs = [loss,outputs]
+            
+        return outputs  # (loss), logits, (hidden_states), (attentions)
+    
+    
+    
+    def freeze_bert_encoder(self):
+        for param in self.roberta.parameters():
+            param.requires_grad = False
+
+    def unfreeze_bert_encoder(self):
+        for param in self.roberta.parameters():
+            param.requires_grad = True
+
+    def unfreeze_bert_encoder_last_layers(self):
+        for name, param in self.roberta.named_parameters():
+            if "encoder.layer.11" in name or "pooler" in name:
+                param.requires_grad = True
+    def unfreeze_bert_encoder_pooler_layer(self):
+        for name, param in self.roberta.named_parameters():
+            if "pooler" in name:
+                param.requires_grad = True
+
+         
+         
+           
                 
 class BiRNN(nn.Module):  
     def __init__(self,args):
