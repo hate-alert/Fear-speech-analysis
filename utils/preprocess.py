@@ -33,7 +33,7 @@ with open('../Data/Data/hindi_stopwords.txt','r') as fp:
 from itertools import groupby 
 from string import punctuation
 
-puncts=[">","+",":",";","*","’","●","•","-",".","''","``","'","|","​","!",",","@","?","\u200d","#","(",")","|","%","।","=","``","&","[","]","/","'"]
+puncts=[">","+",":",";","*","’","●","•","-",".","''","``","'","|","​","!",",","@","?","\u200d","#","(",")","|","%","।","=","``","&","[","]","/","'","”"]
 stop_for_this=hi_stopwords+list(stopwords.stopwords(["en", "hi", "ta","te","bn"]))+["आएगा","गए","गई","करे","नही","हम","वो","follow","दे","₹","हर","••••","▀▄▀","नही","अब","व्हाट्सएप","॥","–","ov","डॉ","ॐॐॐॐॐॐॐॐॐॐॐॐॐॐॐॐॐॐॐॐ","क्या","जी","वो","╬═╬","_","backhand_index_pointing_down","backhand_index_pointing_right","link","subscribe","backhand_index_pointing_down_light_skin_tone","backhand_index_pointing_up","Whatsapp","Follow","Tweet","सब्सक्राइब","Link","\'\'","``","________________________________","_________________________________________"]
 
 # Cell
@@ -44,17 +44,17 @@ def preprocess_sent(sent,params={'remove_numbers':False,'remove_emoji':True,'rem
 
     s = sent
     s = emoji.demojize(s)
-    s = re.sub(r"http\S+",'', s)
-    s = re.sub(r"www.\S+",'', s)
+    s = re.sub(r"http\S+",' ', s)
+    s = re.sub(r"www.\S+",' ', s)
     
     if(params['remove_numbers']==True):
-        s = re.sub(r"[-+]?[.\d]*[\d]+[:,.\d]*", "",s)
+        s = re.sub(r"[-+]?[.\d]*[\d]+[:,.\d]*", " ",s)
     s = re.sub(r"/-", " ",s)
     s = re.sub(r"#,?,\,", " ",s)
     if(params['remove_emoji']==True):
         s = re.sub(r":\S+:", " ",s)
     else:
-        s = re.sub(r"[:\*]", "",s)
+        s = re.sub(r"[:\*]", " ",s)
     
     punc = set(punctuation) - set('.')
 
@@ -70,6 +70,9 @@ def preprocess_sent(sent,params={'remove_numbers':False,'remove_emoji':True,'rem
     
     s=re.sub('[' + re.escape(''.join(puncts)) + ']', '', s)
     s=s.lower()
+    
+    s = re.sub(' +', ' ', s) 
+    
     if(params['tokenize']==True):
         msg= tok.tokenize(s)
     else:

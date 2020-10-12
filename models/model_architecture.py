@@ -6,15 +6,22 @@ from torch import nn
 import torch
 from torch.nn import LSTM,GRU
 
-def select_transformer_model(type_of_model,path,params):
+def select_transformer_model(type_of_model,path,params,fold=0):
     if(type_of_model=='lstm_transformer'):
+        
         if (path=='bert-base-multilingual-cased'):
+            if(params['load_saved']==True):
+                path='Saved/'+params['model_path']+'_'+str(fold)
+            
             model = DocumentBERTLSTM.from_pretrained(
             path, # Use the 12-layer BERT model, with an uncased vocab.
             num_labels = 2,  
             params=params
             )
         elif (path=='xlm-roberta-base'):
+            if(params['load_saved']==True):
+                path='Saved/'+params['model_path']+'_'+str(fold)
+            
             model = DocumentRobertaLSTM.from_pretrained(
             path, # Use the 12-layer BERT model, with an uncased vocab.
             num_labels = 2, # The number of output labels--2 for binary classification             # You can increase this for multi-class tasks.   
@@ -24,16 +31,24 @@ def select_transformer_model(type_of_model,path,params):
         model=BiRNN(params)
     if(type_of_model=='normal_transformer'):
         if (path=='bert-base-multilingual-cased'):
+            if(params['load_saved']==True):
+                path='Saved/'+params['model_path']+'_'+str(fold)
+            
             model = weighted_BERT.from_pretrained(
             path, # Use the 12-layer BERT model, with an uncased vocab.
             num_labels = 2,  
             params=params
             )
         elif (path=='xlm-roberta-base'):
+            
+            if(params['load_saved']==True):
+                path='Saved/'+params['model_path']+'_'+str(fold)
+            
             model = weighted_Roberta.from_pretrained(
             path, # Use the 12-layer BERT model, with an uncased vocab.
             num_labels = 2, # The number of output labels--2 for binary classification             # You can increase this for multi-class tasks.   
-            params=params
+            params=params,
+             
             )
 
     return model

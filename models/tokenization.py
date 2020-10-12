@@ -16,8 +16,16 @@ from laserembeddings import Laser
 def encode_documents(documents,params,tokenizer):
     
     max_input_length=params['max_length']
-    tokenized_documents = [tokenizer.tokenize(document) for document in documents]
-    print(tokenized_documents[0][0:5])
+    
+    
+    tokenized_documents = []
+    for doc in documents:
+        try:
+            temp=tokenizer.tokenize(document)
+        except AttributeError:
+            temp=tokenizer.tokenize("dummy")
+        tokenized_documents.append(temp)
+   
     max_sequences_per_document = math.ceil(max(len(x)/(max_input_length-2) for x in tokenized_documents))
     #assert max_sequences_per_document <= 20, "Your document is to large, arbitrary size when writing"
     print("max sentences in documents",max_sequences_per_document)
@@ -150,7 +158,16 @@ def encode_documents_sent(documents,labels,params,tokenizer=None):
 
 def encode_sent(documents,params,tokenizer=None):
     max_input_length=params['max_length']
-    tokenized_documents = [tokenizer.tokenize(document) for document in documents]
+    
+    tokenized_documents = []
+    for doc in documents:
+        try:
+            temp=tokenizer.tokenize(doc)
+        except AttributeError:
+            temp=tokenizer.tokenize("dummy")
+        tokenized_documents.append(temp)
+   
+    #tokenized_documents = [tokenizer.tokenize(document) for document in documents]
     
     if(params['model_path']=='xlm-roberta-base'):
         start_token='<s>'
@@ -182,18 +199,19 @@ def encode_sent(documents,params,tokenizer=None):
                 count+=1
                 tokens.append(token) 
         if(params['take_tokens_from']=='both'):
-            max_input_length/=2
+            max_input_length_sub=int(max_input_length/2)
             count=0
             for token in doc:
-                if(count >= max_input_length-2):
+                if(count >= max_input_length_sub-2):
                     break
                 count+=1
                 tokens.append(token) 
             
             tokens.append(end_token)
             count=0
-            for token in doc[-(max_input_length-2):]:
-                if(count >= max_input_length-2):
+            
+            for token in doc[-(max_input_length_sub-2):]:
+                if(count >= max_input_length_sub-3):
                     break
                 count+=1
                 tokens.append(token) 
@@ -205,7 +223,7 @@ def encode_sent(documents,params,tokenizer=None):
             input_ids.append(pad_id)
             attention_masks.append(0)
         
-        assert len(input_ids) == max_input_length and len(attention_masks) == max_input_length 
+        assert len(input_ids) == int(max_input_length) and len(attention_masks) == int(max_input_length) 
         inputs_ids_sent.append(input_ids)
         att_masks_sent.append(attention_masks)
 
