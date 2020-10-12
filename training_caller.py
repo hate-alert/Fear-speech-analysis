@@ -37,3 +37,4 @@ params={'model_path':'xlm-roberta-base',
 
 if __name__=='__main__': 
     train_phase_held_out(params)
+    #train_phase(params)
