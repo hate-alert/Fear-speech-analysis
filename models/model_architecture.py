@@ -222,13 +222,13 @@ class weighted_BERT(BertPreTrainedModel):
         pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
         
-        outputs = (logits,) + outputs[2:]  # add hidden states and attention if they are here
+        outputs = logits  # add hidden states and attention if they are here
         
         if labels is not None:
             loss_funct = CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
             loss_logits =  loss_funct(logits.view(-1, self.num_labels), labels.view(-1))
             loss= loss_logits
-            outputs = (loss,) + outputs
+            outputs = [loss,outputs]
             
         return outputs  # (loss), logits, (hidden_states), (attentions)
     
