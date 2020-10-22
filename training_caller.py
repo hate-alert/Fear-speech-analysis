@@ -12,7 +12,7 @@ parent_path='../Data/New_Data_15-06-2020/'
 #bert-base-multilingual-cased
 #xlm-roberta-base
 #lstm_transformer
-params={'model_path':'bert-base-multilingual-cased',
+params={'model_path':'xlm-roberta-base',
         'preprocess_doc':False,
         'max_length':256,
         'batch_size':16,
@@ -23,7 +23,7 @@ params={'model_path':'bert-base-multilingual-cased',
         'data_path':parent_path+'Fearspeech_data_final.pkl',
         'max_sentences_per_doc':5,
         'transformer_type':'normal_transformer',
-        'take_tokens_from':'last',
+        'take_tokens_from':'both',
         'device':'cuda',
         'learning_rate':2e-5,
         'epsilon':1e-8,

@@ -259,7 +259,7 @@ def train_phase(params):
                 epoch_count=epoch_i
                 best_pred_labels=pred_labels
                 best_true_labels=true_labels
-                #save_bert_model(model,tokenizer,params,count_skf)
+                save_bert_model(model,tokenizer,params,count_skf)
         list_total_preds+=best_pred_labels
         list_total_truth+=best_true_labels
         list_val_fscore.append(best_val_fscore)
