@@ -1,6 +1,7 @@
 led / optimized / DLL files
 Saved/
-.ipynb_checkpoints/
+**/*.ipynb_checkpoints/
+formedium-292716-913787bab4ec.json
 __pycache__/
 Topics/
 Networks/
