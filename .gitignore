@@ -1,11 +1,14 @@
 led / optimized / DLL files
 Saved/
+Old_codes/
 **/*.ipynb_checkpoints/
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
 formedium-292716-913787bab4ec.json
 __pycache__/
 Topics/
-Networks/
 Hatespeech_Data/
+Survey_results/
 *.py[cod]
 *$py.class
 *.csv

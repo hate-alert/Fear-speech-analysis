@@ -10,8 +10,11 @@ from langdetect import DetectorFactory
 DetectorFactory.seed = 0
 from langdetect import detect
 from laserembeddings import Laser
+from utils.emoji_extract import *
 
-
+from sklearn.feature_extraction.text import CountVectorizer
+from empath import Empath
+import numpy as np
 
 def encode_documents(documents,params,tokenizer):
     
@@ -156,6 +159,154 @@ def encode_documents_sent(documents,labels,params,tokenizer=None):
     return inputs_ids_sent, att_masks_sent,labels_sent
 
 
+
+
+def dummy(string):
+    return string
+
+import json
+import gensim
+from gensim.test.utils import datapath
+def get_feature_matrix(train,test):
+  
+    temp_file = datapath("lda_model_10")
+    lda_model =  gensim.models.LdaModel.load(temp_file)
+    dictionary = gensim.corpora.Dictionary.load("dictionary_lda.pkl")
+    params={'remove_numbers':True,'remove_emoji':False,'remove_stop_words':True,'tokenize':True}
+        
+    imp_emoji=['🚩','🏹','⛳','🔱','🕉','🐚','👿','👺','🐖','🐷','😈','👹']
+
+    with open('emoji_dict_fs.json') as json_file:
+        fs_data = json.load(json_file)
+    
+    with open('emoji_dict_nfs.json') as json_file:
+        nfs_data = json.load(json_file)
+    
+    
+    
+    lexicon=Empath()
+    categories=["hate", "crime", "aggression", "suffering", "fight", "war", "weapon","negative_emotion","giving", "achievement", "fun"]
+    
+    
+    
+    
+    emoji_list_train=[]
+    empath_list_train=[]
+    topic_list_train=[]
+    
+    emoji_list_test=[]
+    empath_list_test=[]
+    topic_list_test=[]
+    
+    for index,row in tqdm(train.iterrows(),total=len(train)):
+        #emoji_list_train.append(extract_emojis(row['message_text']))
+        
+        
+        #### topic vectors
+        token_list=preprocess_sent(row['message_text'],params)
+        vector=np.zeros(10)
+        topic_preds=lda_model[dictionary.doc2bow(token_list)]
+        for topic in topic_preds[0]:
+            vector[topic[0]]=topic[1]
+        topic_list_train.append(list(vector))
+        
+        
+        
+        temp_emoji_list=extract_emojis(row['message_text'])
+        temp_val=[]
+        for emoji in imp_emoji:
+            if(emoji in temp_emoji_list):
+                if(row['one_fear_speech']==1):
+                    try:
+                        temp_val.append(fs_data[emoji])
+                    except KeyError:
+                        temp_val.append(0)
+                else:
+                    try:
+                        temp_val.append(nfs_data[emoji])
+                    except KeyError:
+                        temp_val.append(0)
+        
+            else:
+                temp_val.append(0)
+                
+        emoji_list_train.append(temp_val)
+                
+        dict_lexicon=lexicon.analyze(row['translated'], normalize=True)
+        try:
+            temp=dict_lexicon.values()
+        except AttributeError:
+            dict_lexicon=lexicon.analyze("sample text", normalize=True)
+        temp_list=[]
+        for key in categories:
+            temp_list.append(dict_lexicon[key])
+        empath_list_train.append(temp_list)
+    
+    
+    for index,row in tqdm(test.iterrows(),total=len(test)):
+        #emoji_list_test.append(extract_emojis(row['message_text']))
+        token_list=preprocess_sent(row['message_text'],params)
+        vector=np.zeros(10)
+        topic_preds=lda_model[dictionary.doc2bow(token_list)]
+        for topic in topic_preds[0]:
+            vector[topic[0]]=topic[1]
+        topic_list_test.append(list(vector))
+        
+        temp_emoji_list=extract_emojis(row['message_text'])
+        temp_val=[]
+        for emoji in imp_emoji:
+            if(emoji in temp_emoji_list):
+                if(row['one_fear_speech']==1):
+                    try:
+                        temp_val.append(fs_data[emoji])
+                    except KeyError:
+                        temp_val.append(0)
+                else:
+                    try:
+                        temp_val.append(nfs_data[emoji])
+                    except KeyError:
+                        temp_val.append(0)
+        
+            else:
+                temp_val.append(0)
+        
+        emoji_list_test.append(temp_val)
+
+        
+        dict_lexicon=lexicon.analyze(row['translated'], normalize=True)
+        try:
+            temp=dict_lexicon.values()
+        except AttributeError:
+            dict_lexicon=lexicon.analyze("sample text", normalize=True)
+        temp_list=[]
+        for key in categories:
+            temp_list.append(dict_lexicon[key])
+        empath_list_test.append(temp_list)
+    
+    
+        
+    
+    #vectorizer = CountVectorizer(stop_words=None,lowercase=False,tokenizer=dummy,preprocessor=None)
+    
+    
+    #X_train=vectorizer.fit_transform(emoji_list_train)
+    X_empath_train=np.array(empath_list_train)
+    X_emoji_train=np.array(emoji_list_train)
+    X_topic_train=np.array(topic_list_train)
+    X_train_final=np.concatenate((X_emoji_train,X_empath_train,X_topic_train),axis=1)
+    
+    
+    #X_test=vectorizer.transform(emoji_list_test)
+    
+    X_empath_test=np.array(empath_list_test)
+    X_emoji_test=np.array(emoji_list_test)
+    X_topic_test=np.array(topic_list_test)
+    X_test_final=np.concatenate((X_emoji_test,X_empath_test,X_topic_test),axis=1)
+    
+    return X_train_final,X_test_final 
+
+
+
 def encode_sent(documents,params,tokenizer=None):
     max_input_length=params['max_length']
     
@@ -257,6 +408,24 @@ def return_dataloader_sent(inputs_ids, att_masks,labels,params,is_train=False):
     tokens_types = torch.zeros(size=(token_ids.shape[0],token_ids.shape[1]),dtype=torch.long)
 
     data=TensorDataset(token_ids,attentions_mask,tokens_types,labels)       
+    if(is_train==False):
+        sampler = SequentialSampler(data)
+    else:
+        sampler = RandomSampler(data)
+        
+    dataloader = DataLoader(data, sampler=sampler, batch_size=params['batch_size'])
+    return dataloader
+
+
+
+def return_dataloader_sent_extra(inputs_ids, att_masks,extra_features,labels,params,is_train=False):
+    labels = torch.tensor(labels,dtype=torch.long)
+    token_ids= torch.tensor(inputs_ids,dtype=torch.long)  
+    extra_features = torch.tensor(extra_features,dtype=torch.float)  
+    attentions_mask= torch.tensor(att_masks,dtype=torch.long)
+    tokens_types = torch.zeros(size=(token_ids.shape[0],token_ids.shape[1]),dtype=torch.long)
+
+    data=TensorDataset(token_ids,attentions_mask,extra_features,tokens_types,labels)       
     if(is_train==False):
         sampler = SequentialSampler(data)
     else:

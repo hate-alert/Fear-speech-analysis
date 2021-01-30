@@ -318,7 +318,78 @@ class weighted_Roberta(RobertaPreTrainedModel):
             if "pooler" in name:
                 param.requires_grad = True
 
-         
+      
+    
+class weighted_Roberta_extra_features(RobertaPreTrainedModel):
+    def __init__(self, config,params):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.weights=params['weights']
+        self.extra_feature_len=params['hand_feature_len']
+        self.roberta= RobertaModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.converter=nn.Linear(self.extra_feature_len,100)
+        self.classifier = nn.Linear(config.hidden_size+100, config.num_labels)
+        #self.softmax=nn.Softmax(config.num_labels)
+        self.init_weights()
+
+    def forward(self,
+        input_ids=None,
+        input_extra_features=None,
+        attention_mask=None,
+        attention_vals=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        device=None):
+
+        outputs = self.roberta(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+        )
+
+        pooled_output = outputs[1]
+        
+        extra_output = self.converter(input_extra_features)
+        pooled_output= torch.cat([pooled_output, extra_output], dim=1) 
+        pooled_output = self.dropout(pooled_output)
+        logits = self.classifier(pooled_output)
+        
+        outputs =logits  # add hidden states and attention if they are here
+        
+        if labels is not None:
+            loss_funct = CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
+            loss_logits =  loss_funct(logits.view(-1, self.num_labels), labels.view(-1))
+            loss= loss_logits
+            outputs = [loss,outputs]
+            
+        return outputs  # (loss), logits, (hidden_states), (attentions)
+    
+    
+    
+    def freeze_bert_encoder(self):
+        for param in self.roberta.parameters():
+            param.requires_grad = False
+
+    def unfreeze_bert_encoder(self):
+        for param in self.roberta.parameters():
+            param.requires_grad = True
+
+    def unfreeze_bert_encoder_last_layers(self):
+        for name, param in self.roberta.named_parameters():
+            if "encoder.layer.11" in name or "pooler" in name:
+                param.requires_grad = True
+    def unfreeze_bert_encoder_pooler_layer(self):
+        for name, param in self.roberta.named_parameters():
+            if "pooler" in name:
+                param.requires_grad = True
+
          
            
                 
