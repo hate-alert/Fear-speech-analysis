@@ -3,7 +3,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
-## "Short is the Road that Leads from Fear :fearful: to Hate :cursing_face:" :Fear Speech in Indian WhatsApp Groups [Accepted at The Web Conference 2021] 
+## "Short is the Road that Leads from Fear :fearful: to Hate :cursing_face: " :Fear Speech in Indian WhatsApp Groups [Accepted at The Web Conference 2021] 
 
 :warning: ***WARNING: The repository contains content that are polarising in nature.*** :warning:
 
