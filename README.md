@@ -24,15 +24,31 @@ WhatsApp is the most popular messaging app in the world. Due to its popularity, 
 **Please cite our paper in any published work that uses any of these resources.**
 
 ~~~bibtex
+@article{
+}
 ~~~
 
 ------------------------------------------
-**Folder Description** :open_file_folder:	
+**Folders' Description** :open_file_folder:	
 ------------------------------------------
 ~~~
 ./Data                --> Contains dataset related files.
 ./Network             --> Contains precomputed network files for user and emoji networks.
-./models  	      --> Contains deep learning model architecture codes and helper codes.
+./models	      --> Contains deep learning model architecture codes and helper codes.
 ./utils               --> Contains several utility functions for common usage.
 ~~~
+----------------------------------------------------------
+**Notebooks' description** :notebook_with_decorative_cover:
+----------------------------------------------------------
+~~~
+
+Classical_models.ipynb  --> Contains the implementation of doc2vec vectors with Support vector machines and Logistic Regression 
+Data-statistics.ipynb   --> Contains common data statistics and comparison between fear speech and non fear speech based on their sharing, number of groups, and number of users
+Inference.ipynb         --> Contains the performance scores for test dataset across 5 fold cross validation. Also calculates the lime based interpretability for few of the samples
+Network_analysis.ipynb  --> Contains the network based analysis of the user-user networks
+Textual analysis.ipynb  --> Contains different analysis of the text -> topics , empath and emojis
+
+~~~
+
+
 
