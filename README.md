@@ -71,7 +71,7 @@ One has to change parameters in the dicitionary `params`. A detailed instruction
 **Blogs and github repos which we used for reference :angel:**
 ----------------------------------------------------------
 
-1. For annotation we used the [Docanno platform](https://github.com/doccano/doccano) and its unoffical [client](https://github.com/doccano/doccano-client)
+1. For annotation we used the [Docanno platform](https://github.com/doccano/doccano) and its unoffical [client](https://github.com/doccano/doccano-client).
 2. For finetuning BERT this [blog](https://mccormickml.com/2019/07/22/BERT-fine-tuning/)  by Chris McCormick is used and we also referred [Transformers github repo](https://github.com/huggingface/transformers).
 
 ### Todos
