@@ -21,6 +21,12 @@ WhatsApp is the most popular messaging app in the world. Due to its popularity, 
 * Fear speech messages tend to spread faster and could potentially go undetected by classifiers built to detect traditional toxic speech due to their **low toxic nature**. 
 * Finally, using a novel privacy preserving methodology to **target users with Facebook ads**, we conduct a survey among the users of these WhatsApp groups to understand the perception of users who consume and share fear speech. 
 
+------------------------------------------
+**Example from the dataset** :writing_hand:	
+------------------------------------------
+<p align="center"><img src="Figures/dataset_example.png" width="350" height="300"></p>
+
+
 **Please cite our paper in any published work that uses any of these resources.**
 
 ~~~bibtex
