@@ -24,7 +24,7 @@ WhatsApp is the most popular messaging app in the world. Due to its popularity, 
 ------------------------------------------
 **Example from the dataset** :writing_hand:	
 ------------------------------------------
-<p align="center"><img src="Figures/dataset_example.png" width="350" height="300"></p>
+<p align="center"><img src="Figures/Fearspeech_arxiv.png" width="350" height="300"></p>
 
 
 **Please cite our paper in any published work that uses any of these resources.**
