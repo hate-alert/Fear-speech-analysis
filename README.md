@@ -64,9 +64,8 @@ Install the libraries using the following command (preferably inside an environe
 pip install -r requirements.txt
 ~~~
 
-----------------------------------------------------------
-**Training the deep learning models** :weight_lifting:
-----------------------------------------------------------
+
+#### Training the deep learning models :weight_lifting:
 
 ~~~
 usage: training_caller.py
