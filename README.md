@@ -65,7 +65,7 @@ pip install -r requirements.txt
 ~~~
 usage: training_caller.py
 ~~~
-One has to change parameters in the dicitionary `params`. A detailed instructions about the parameters dictionary in the this [Guideline](Parameters.md)
+One has to change parameters in the dicitionary `params` inside the python file. A detailed instructions about the parameters dictionary in the this [Guideline](Parameters.md)
 
 ----------------------------------------------------------
 **Blogs and github repos which we used for reference :angel:**
