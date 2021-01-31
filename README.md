@@ -43,12 +43,39 @@ WhatsApp is the most popular messaging app in the world. Due to its popularity, 
 ~~~
 
 Classical_models.ipynb  --> Contains the implementation of doc2vec vectors with Support vector machines and Logistic Regression 
-Data-statistics.ipynb   --> Contains common data statistics and comparison between fear speech and non fear speech based on their sharing, number of groups, and number of users
-Inference.ipynb         --> Contains the performance scores for test dataset across 5 fold cross validation. Also calculates the lime based interpretability for few of the samples
-Network_analysis.ipynb  --> Contains the network based analysis of the user-user networks
-Textual analysis.ipynb  --> Contains different analysis of the text -> topics , empath and emojis
+Data-statistics.ipynb   --> Contains common data statistics and comparison between fear speech and non fear speech based on their sharing, number of groups, and number of users.
+Inference.ipynb         --> Contains the performance scores for test dataset across 5 fold cross validation. Also calculates the lime based interpretability for few of the samples.
+Network_analysis.ipynb  --> Contains the network based analysis of the user-user networks.
+Textual analysis.ipynb  --> Contains different analysis of the fear speech messages -> topics , empath and emojis.
 
 ~~~
+----------------------------------------------------------
+**Usage instructions**
+----------------------------------------------------------
 
+Install the libraries using the following command (preferably inside an environemt)
+~~~
+pip install -r requirements.txt
+~~~
 
+----------------------------------------------------------
+**Training the deep learning models**
+----------------------------------------------------------
+
+~~~
+usage: training_caller.py
+~~~
+One has to change parameters in the dicitionary `params`. A detailed instructions about the parameters dictionary in the this [Guideline](Parameters.md)
+
+----------------------------------------------------------
+**Blogs and github repos which we used for reference :angel:**
+----------------------------------------------------------
+
+1. For annotation we used the [Docanno platform](https://github.com/doccano/doccano) and its unoffical [client](https://github.com/doccano/doccano-client)
+2. For finetuning BERT this [blog](https://mccormickml.com/2019/07/22/BERT-fine-tuning/)  by Chris McCormick is used and we also referred [Transformers github repo](https://github.com/huggingface/transformers).
+
+### Todos
+- [ ] Add arxiv paper link and description.
+
+##### :thumbsup: The repo is still in active developements. Feel free to create an [issue](https://github.com/punyajoy/Fear-speech-analysis/issues) !!  :thumbsup:
 
