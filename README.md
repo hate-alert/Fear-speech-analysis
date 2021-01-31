@@ -56,7 +56,7 @@ Textual analysis.ipynb  --> Contains different analysis of the fear speech messa
 
 ~~~
 ----------------------------------------------------------
-**Usage instructions**
+**Usage instructions** :construction_worker:
 ----------------------------------------------------------
 
 Install the libraries using the following command (preferably inside an environemt)
@@ -65,7 +65,7 @@ pip install -r requirements.txt
 ~~~
 
 ----------------------------------------------------------
-**Training the deep learning models**
+**Training the deep learning models** :weight_lifting:
 ----------------------------------------------------------
 
 ~~~
