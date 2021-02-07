@@ -73,6 +73,14 @@ usage: training_caller.py
 One has to change parameters in the dicitionary `params` inside the python file. A detailed instructions about the parameters dictionary in the this [Guideline](Parameters.md)
 
 ----------------------------------------------------------
+**Ethics note :eye_speech_bubble:**
+----------------------------------------------------------
+
+We established strict ethics guidelines throughout the project. The Committee on the Use of Humans as Experimental Subjects at MIT approved the data collection as exempt.All personally identifiable information was anonymized and stored separately from the message data.
+Our data release conforms to the FAIR principles. We explicitly trained our annotators to be aware of the disturbing nature of social media messages and to take regular breaks from the annotation.
+
+
+----------------------------------------------------------
 **Blogs and github repos which we used for reference :angel:**
 ----------------------------------------------------------
 
