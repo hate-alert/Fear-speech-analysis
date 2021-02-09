@@ -7,6 +7,8 @@
 
 :warning: ***WARNING: The repository contains content that are polarising in nature.*** :warning:
 
+### :tada: :tada: Have a look at our preprint for more detailed information [link here](https://arxiv.org/abs/2102.03870) :tada: :tada:.
+
 ## Abstract
 
 WhatsApp is the most popular messaging app in the world. Due to its popularity, WhatsApp has become a powerful and cheap tool for political campaigning being widely used during the 2019 Indian general election, where it was used to connect to the voters on a large scale. Along with the campaigning, there have been reports that WhatsApp has also become a breeding ground for harmful speech against various protected groups and religious minorities. Many such messages attempt to instil fear among the population about a specific (minority) community. According to research on inter-group conflict, such "fear speech" messages could have a lasting impact and might lead to real offline violence. In this paper, we perform the first large scale study on fear speech across thousands of public WhatsApp groups discussing politics in India. 
