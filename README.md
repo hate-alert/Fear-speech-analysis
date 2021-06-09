@@ -32,13 +32,17 @@ WhatsApp is the most popular messaging app in the world. Due to its popularity, 
 **Please cite our paper in any published work that uses any of these resources.**
 
 ~~~bibtex
-@article{punyajoy2021fear,
-  title={"Short is the Road that Leads from Fear to Hate": Fear Speech in Indian WhatsApp Groups},
-  author={Saha, Punyajoy and Mathew, Binny and Garimelaa Kiran and Mukherjee, Animesh},
-  journal={arXiv preprint arXiv:2102.03870},
-  year={2021}
+@inproceedings{punyajoy2021fear,
+author = {Saha, Punyajoy and Mathew, Binny and Garimella, Kiran and Mukherjee, Animesh},
+title = {“Short is the Road That Leads from Fear to Hate”: Fear Speech in Indian WhatsApp Groups},
+year = {2021},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+booktitle = {Proceedings of the Web Conference 2021},
+pages = {1110–1121},
+location = {Ljubljana, Slovenia},
+series = {WWW '21}
 }
-
 ~~~
 
 ------------------------------------------
