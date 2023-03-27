@@ -98,8 +98,5 @@ Our data release conforms to the FAIR principles. We explicitly trained our anno
 1. For annotation we used the [Docanno platform](https://github.com/doccano/doccano) and its unoffical [client](https://github.com/doccano/doccano-client).
 2. For finetuning BERT this [blog](https://mccormickml.com/2019/07/22/BERT-fine-tuning/)  by Chris McCormick is used and we also referred [Transformers github repo](https://github.com/huggingface/transformers).
 
-### Todos
-- [ ] Add arxiv paper link and description.
-
 ##### :thumbsup: The repo is still in active developements. Feel free to create an [issue](https://github.com/punyajoy/Fear-speech-analysis/issues) !!  :thumbsup:
 
